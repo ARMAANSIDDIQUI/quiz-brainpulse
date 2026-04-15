@@ -3,42 +3,55 @@ import React, { useState, useEffect, useRef } from 'react';
 const Quiz = ({ questions, timerLimit, onFinish }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState(new Array(questions.length).fill(null));
+  const [remainingTimes, setRemainingTimes] = useState(new Array(questions.length).fill(timerLimit));
   const [timeLeft, setTimeLeft] = useState(timerLimit);
   const inputRef = useRef(null);
 
   const currentQuestion = questions[currentIndex];
 
   useEffect(() => {
+    // Load state for new question
+    const savedTime = remainingTimes[currentIndex];
+    setTimeLeft(savedTime);
+    
     if (inputRef.current) {
       inputRef.current.focus();
-      // Set the input to the previous answer if it exists
-      const saved = userAnswers[currentIndex];
-      const val = (saved && saved !== 'TIMEOUT') ? saved : '';
-      inputRef.current.value = val;
+      const savedAns = userAnswers[currentIndex];
+      inputRef.current.value = (savedAns && savedAns !== 'TIMEOUT') ? savedAns : '';
+      
+      // Disable input if time has already run out for this question
+      inputRef.current.disabled = savedTime <= 0;
     }
-    
-    setTimeLeft(timerLimit); // Reset timer for the question (per user request for traversion)
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          saveAndNavigate(1, 'TIMEOUT');
-          return timerLimit;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    if (savedTime > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            saveAndNavigate(1, 'TIMEOUT', 0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
   }, [currentIndex]);
 
-  const saveAndNavigate = (dir, val = inputRef.current.value) => {
-    // Save current answer
+  const saveAndNavigate = (dir, val = inputRef.current.value, finalTime = null) => {
+    // 1. Sync current time and answer before moving
     const newAnswers = [...userAnswers];
-    // Don't overwrite if it was a timeout, unless we have a new value
+    const newTimes = [...remainingTimes];
+    
+    // Save current answer (don't overwrite 'TIMEOUT' unless we have a manual entry)
     if (val !== null) newAnswers[currentIndex] = val;
+    
+    // Save current time
+    newTimes[currentIndex] = finalTime !== null ? finalTime : timeLeft;
+    
     setUserAnswers(newAnswers);
+    setRemainingTimes(newTimes);
 
+    // 2. Determine target
     const nextIndex = currentIndex + dir;
 
     if (nextIndex >= 0 && nextIndex < questions.length) {
@@ -47,7 +60,8 @@ const Quiz = ({ questions, timerLimit, onFinish }) => {
       // Calculate final results
       const finalStats = questions.map((q, idx) => {
         const uAns = newAnswers[idx];
-        const isTimeout = uAns === 'TIMEOUT';
+        const rTime = newTimes[idx];
+        const isTimeout = uAns === 'TIMEOUT' || (rTime <= 0 && !uAns);
         const isCorrect = !isTimeout && parseInt(uAns) === q.answer;
         return {
           question: q.text,
@@ -69,7 +83,9 @@ const Quiz = ({ questions, timerLimit, onFinish }) => {
     <div className="quiz-container" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
         <span>Question {currentIndex + 1}/{questions.length}</span>
-        <span style={{ color: 'var(--primary)' }}>Ready to solve?</span>
+        <span style={{ color: timeLeft <= 3 ? 'var(--accent)' : 'var(--primary)' }}>
+          {timeLeft <= 0 ? 'TIME EXPIRED' : 'SOLVE NOW'}
+        </span>
       </div>
 
       <div className="glass-progress" style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -80,20 +96,20 @@ const Quiz = ({ questions, timerLimit, onFinish }) => {
       </div>
 
       <div className="glass quiz-card" style={{ padding: '3rem 1.5rem', textAlign: 'center', position: 'relative' }}>
-        <div className={`timer-ring ${timeLeft <= 3 ? 'timer-stress' : ''}`} style={{
-          position: 'absolute', top: '1rem', right: '1rem', fontSize: '1.2rem', fontWeight: 'bold'
+        <div className={`timer-ring ${timeLeft <= 3 && timeLeft > 0 ? 'timer-stress' : ''}`} style={{
+          position: 'absolute', top: '1rem', right: '1rem', fontSize: '1.2rem', fontWeight: 'bold',
+          color: timeLeft <= 0 ? 'var(--text-dim)' : 'inherit'
         }}>
           {timeLeft}s
         </div>
 
-        <div className="question-text" style={{ fontSize: '3.5rem', fontWeight: '800', marginBottom: '1.5rem', wordBreak: 'break-word' }}>
+        <div className="question-text" style={{ fontSize: '3.5rem', fontWeight: '800', marginBottom: '1.5rem', wordBreak: 'break-word', opacity: timeLeft <= 0 ? 0.5 : 1 }}>
           {currentQuestion.text}
         </div>
 
         <input 
           ref={inputRef} type="number"
           onKeyDown={handleKeyDown} placeholder="?"
-          autoFocus
           style={{
             background: 'transparent', border: 'none', borderBottom: '2px solid var(--primary)',
             fontSize: '2.5rem', textAlign: 'center', color: 'white', width: '100%', marginBottom: '2rem', outline: 'none'
@@ -118,7 +134,6 @@ const Quiz = ({ questions, timerLimit, onFinish }) => {
           </button>
         </div>
       </div>
-      <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>Tip: You can use ENTER key for next question</p>
     </div>
   );
 };
