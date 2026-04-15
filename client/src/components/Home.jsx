@@ -19,7 +19,20 @@ const Home = ({ setMode, setView }) => {
   return (
     <div className="home-container" style={{ textAlign: 'center', width: '100%' }}>
       <header style={{ marginBottom: '3rem' }}>
-        <img src="/logo.png" alt="BrainPulse Logo" style={{ width: '100px', height: '100px', borderRadius: '50%', marginBottom: '1rem', boxShadow: '0 0 40px rgba(0, 242, 255, 0.3)' }} />
+        <img 
+          src="/logo.png" 
+          alt="BrainPulse Logo" 
+          className="floating"
+          style={{ 
+            width: '120px', 
+            height: '120px', 
+            borderRadius: '24px', 
+            marginBottom: '1.5rem', 
+            boxShadow: '0 0 40px rgba(0, 242, 255, 0.2)',
+            transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+            border: '1px solid rgba(0, 242, 255, 0.1)'
+          }} 
+        />
         <h1 className="glow-text">BrainPulse</h1>
         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Train your mind for quantum speed</p>
       </header>

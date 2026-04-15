@@ -58,6 +58,22 @@ function App() {
         />
       )}
       {view === 'RESULTS' && <Results results={results} onReset={reset} />}
+
+      <footer style={{ 
+        marginTop: '3rem', 
+        paddingTop: '2rem', 
+        width: '100%', 
+        textAlign: 'center', 
+        color: 'var(--text-dim)', 
+        fontSize: '0.8rem',
+        letterSpacing: '0.1rem'
+      }}>
+        By <a href="https://armaansiddiqui.online" target="_blank" rel="noopener noreferrer" style={{ 
+          color: 'var(--primary)', 
+          textDecoration: 'none', 
+          fontWeight: '600' 
+        }}>armaansiddiqui.online</a>
+      </footer>
     </div>
   );
 }
