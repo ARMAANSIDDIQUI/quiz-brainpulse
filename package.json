@@ -7,7 +7,7 @@
     "client": "npm run dev --prefix client",
     "server": "npm run dev --prefix server",
     "postinstall": "npm install --prefix client && npm install --prefix server",
-    "build": "npm run build --prefix client && mv client/dist dist",
+    "build": "npm run build --prefix client && mv client/dist public",
     "start": "node server/index.js"
   },
   "dependencies": {
