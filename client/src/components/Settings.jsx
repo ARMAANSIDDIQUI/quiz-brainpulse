@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 
 const Settings = ({ mode, config, onStart, onBack }) => {
+  const getDefaultMax = () => {
+    switch(mode) {
+      case 'ADDITION':
+      case 'SUBTRACTION':
+      case 'DIVISION':
+      case 'BODMAS': return 100;
+      case 'TABLES':
+      case 'SQUARES':
+      case 'CUBES': return 10;
+      default: return 10;
+    }
+  };
+
   const getDefaultSeconds = () => {
     switch(mode) {
       case 'TABLES': return 10;
@@ -15,8 +28,8 @@ const Settings = ({ mode, config, onStart, onBack }) => {
   };
 
   const [localConfig, setLocalConfig] = useState({
-    maxNumber: 10,
-    numQuestions: mode === 'TABLES' ? 30 : 10,
+    maxNumber: getDefaultMax(),
+    numQuestions: mode === 'TABLES' ? 20 : 10,
     secondsPerQuestion: getDefaultSeconds()
   });
 
@@ -30,8 +43,8 @@ const Settings = ({ mode, config, onStart, onBack }) => {
       <h2 style={{ fontSize: '1.5rem', textAlign: 'center' }}>Configure {mode}</h2>
       
       <div className="form-group">
-        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>Max Table / Number (n)</label>
-        <input type="number" name="maxNumber" value={localConfig.maxNumber} onChange={handleChange} className="glass-input" />
+        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>Max Table / Number (n) - Fixed</label>
+        <input type="number" name="maxNumber" value={localConfig.maxNumber} readOnly className="glass-input" style={{ opacity: 0.6, cursor: 'not-allowed' }} />
       </div>
 
       <div className="form-group">
@@ -43,6 +56,7 @@ const Settings = ({ mode, config, onStart, onBack }) => {
         <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>Seconds per question</label>
         <input type="number" name="secondsPerQuestion" value={localConfig.secondsPerQuestion} onChange={handleChange} className="glass-input" />
       </div>
+
 
       <div style={{ display: 'flex', gap: '0.8rem' }}>
         <button className="btn" style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', flex: 1 }} onClick={onBack}>BACK</button>
