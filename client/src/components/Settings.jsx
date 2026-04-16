@@ -35,7 +35,7 @@ const Settings = ({ mode, config, onStart, onBack }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLocalConfig(prev => ({ ...prev, [name]: parseInt(value) }));
+    setLocalConfig(prev => ({ ...prev, [name]: value === '' ? '' : parseInt(value) || 0 }));
   };
 
   return (
@@ -43,8 +43,8 @@ const Settings = ({ mode, config, onStart, onBack }) => {
       <h2 style={{ fontSize: '1.5rem', textAlign: 'center' }}>Configure {mode}</h2>
       
       <div className="form-group">
-        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>Max Table / Number (n) - Fixed</label>
-        <input type="number" name="maxNumber" value={localConfig.maxNumber} readOnly className="glass-input" style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-dim)', fontSize: '0.85rem' }}>Max Table / Number (n)</label>
+        <input type="number" name="maxNumber" value={localConfig.maxNumber} onChange={handleChange} className="glass-input" />
       </div>
 
       <div className="form-group">

@@ -10,11 +10,14 @@ export const generateQuiz = (mode, config) => {
     BODMAS: 100
   };
 
-  const n = limits[mode] || 10;
+  const n = config.maxNumber || limits[mode] || 10;
   const { numQuestions = 10 } = config;
   const questions = [];
   const usedQuestions = new Set();
-  const getRand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const getRand = (min, max) => {
+    if (min > max) [min, max] = [max, min];
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
 
   while (questions.length < numQuestions) {
     let question = {};
@@ -48,26 +51,26 @@ export const generateQuiz = (mode, config) => {
       const b = getRand(2, a);
       question = { text: `${a} - ${b}`, answer: a - b };
     } else if (mode === 'DIVISION') {
-      // n is 100, so we want dividend up to 100
-      const divisor = getRand(2, 10);
-      const maxQuotient = Math.floor(n / divisor);
-      const quotient = getRand(2, isHard ? maxQuotient : Math.ceil(maxQuotient * 0.6));
+      // dividend up to divisor * maxQuotient
+      const divisor = getRand(2, Math.max(2, Math.min(10, n)));
+      const maxQuotient = Math.max(2, Math.floor(n / divisor));
+      const quotient = getRand(2, isHard ? maxQuotient : Math.max(2, Math.ceil(maxQuotient * 0.6)));
       const dividend = divisor * quotient;
       question = { text: `${dividend} ÷ ${divisor}`, answer: quotient };
     } else if (mode === 'BODMAS') {
       const p = getRand(0, 3);
-      const a = getRand(2, isHard ? 30 : 10);
-      const b = getRand(2, isHard ? 20 : 10);
-      const c = getRand(2, isHard ? 20 : 10);
+      const a = getRand(2, isHard ? Math.min(30, n) : Math.min(10, n));
+      const b = getRand(2, isHard ? Math.min(20, n) : Math.min(10, n));
+      const c = getRand(2, isHard ? Math.min(20, n) : Math.min(10, n));
       
       if (p === 0) question = { text: `(${a} + ${b}) × ${c}`, answer: (a + b) * c };
       else if (p === 1) question = { text: `${a} × ${b} + ${c}`, answer: a * b + c };
       else if (p === 2) question = { text: `${a} × ${b} - ${c}`, answer: a * b - c };
       else {
-        const divisor = getRand(2, 10);
-        const quotient = getRand(2, 10);
+        const divisor = getRand(2, Math.max(2, Math.min(10, n)));
+        const quotient = getRand(2, Math.max(2, Math.min(10, n)));
         const dividend = divisor * quotient;
-        const add = getRand(2, isHard ? 50 : 20);
+        const add = getRand(2, isHard ? Math.min(50, n) : Math.min(20, n));
         question = { text: `${dividend} ÷ ${divisor} + ${add}`, answer: quotient + add };
       }
     }
