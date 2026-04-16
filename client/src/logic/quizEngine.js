@@ -19,7 +19,9 @@ export const generateQuiz = (mode, config) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
+  let attempts = 0;
   while (questions.length < numQuestions) {
+    attempts++;
     let question = {};
     const questionNum = questions.length + 1;
     const isHard = questionNum % 3 === 0;
@@ -81,7 +83,7 @@ export const generateQuiz = (mode, config) => {
       questions.push({ id: questions.length, ...question, type: mode.toLowerCase() });
     }
     
-    if (usedQuestions.size >= 1000) break;
+    if (attempts >= 1000) break;
   }
   return questions;
 };
